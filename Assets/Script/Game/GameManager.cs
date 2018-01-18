@@ -10,6 +10,9 @@ public class GameManager : MonoBehaviour
     public static int mainPlayerUid;
     public Text text;
     public Queue<byte[]> quesitionQueue = new Queue<byte[]>();
+    public Queue<byte[]> answerQueue = new Queue<byte[]>();
+
+	public List<Player> players = new List<Player>();
     /// <summary>
     /// net connect
     /// </summary>
@@ -27,12 +30,11 @@ public class GameManager : MonoBehaviour
                 NetworkManager.StarXService.On("onMessage", onMessageHandler);
                 NetworkManager.StarXService.On("leave", onLeaveHandler);
                 NetworkManager.StarXService.On("AnswerNotify", AnswerNotify);
+				NetworkManager.StarXService.On("endCompetition", EndCompetitionNotify);
+
+
             });
         });
-    }
-    void OnUpdateMyWorld(byte[] msg)
-    {
-        Debug.Log("OnUpdateMyWorld");
     }
 
     void onMessageHandler(byte[] msg)
@@ -43,6 +45,13 @@ public class GameManager : MonoBehaviour
     {
         Debug.Log("OnLeave");
     }
+	void EndCompetitionNotify(byte[] msg)
+	{
+		string jsonData = Encoding.UTF8.GetString (msg);
+		Debug.LogWarning (jsonData);
+		EndCompetition pData = SimpleJson.SimpleJson.DeserializeObject<EndCompetition> (jsonData);
+		Debug.Log ("the win id:" + pData.winId);
+	}
 
     /// <summary>
     /// on player data update
@@ -50,8 +59,7 @@ public class GameManager : MonoBehaviour
     /// <param name="msg"></param>
     void AnswerNotify(byte[] msg)
     {
-        string jsonData = Encoding.UTF8.GetString(msg);
-        PlayerAnswer pData = SimpleJson.SimpleJson.DeserializeObject<PlayerAnswer>(jsonData);
+		answerQueue.Enqueue (msg);
     }
     /// <summary>
     /// player clone queue 
@@ -61,6 +69,10 @@ public class GameManager : MonoBehaviour
         if (quesitionQueue.Count > 0)
         {
             ShowQuestion(quesitionQueue.Dequeue());
+        }
+        if(answerQueue.Count >0)
+        {
+			ShowAnswer (answerQueue.Dequeue ());
         }
     }
     /// <summary>
@@ -85,6 +97,19 @@ public class GameManager : MonoBehaviour
         Quesition jsonObj = SimpleJson.SimpleJson.DeserializeObject<Quesition>(jsonData);
         text.text = jsonObj.sDesc;
     }
+    void ShowAnswer(byte[] msg)
+    {
+        string jsonData = Encoding.UTF8.GetString(msg);
+		Debug.Log (jsonData);
+        AnswerNotify pData = SimpleJson.SimpleJson.DeserializeObject<AnswerNotify>(jsonData);
+		if (players.Exists (x => x.id == pData.id)) {
+		} else {
+			Player p = new Player ();
+			p.id = pData.id;
+			p.score = pData.score;
+			players.Add (p);
+		}
+    }
 
     public void OnDestroy()
     {
@@ -108,6 +133,11 @@ public class AnswerNotify
     public int id;
     public bool isRight;
     public int score;
+}
+
+public class EndCompetition
+{
+	public int winId;
 }
 
 public class Player

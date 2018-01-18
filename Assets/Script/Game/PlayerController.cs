@@ -6,19 +6,19 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Keypad1))
+		if (Input.GetKeyDown(KeyCode.Alpha1))
         {
             SendServerNotify(1);
         }
-        else if (Input.GetKeyDown(KeyCode.Keypad2))
+		else if (Input.GetKeyDown(KeyCode.Alpha2))
         {
             SendServerNotify(2);
         }
-        else if (Input.GetKeyDown(KeyCode.Keypad3))
+		else if (Input.GetKeyDown(KeyCode.Alpha3))
         {
             SendServerNotify(3);
         }
-        else if (Input.GetKeyDown(KeyCode.Keypad4))
+		else if (Input.GetKeyDown(KeyCode.Alpha4))
         {
             SendServerNotify(4);
         }
@@ -29,10 +29,6 @@ public class PlayerController : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             LeaveRoom();
-        }
-        if(Input.anyKeyDown)
-        {
-            NetworkManager.StarXService.Notify("Room.Update", new byte[] { });
         }
     }
     void StartCompetition()
@@ -74,6 +70,8 @@ public class PlayerData
 
 public class PlayerAnswer
 {
-    public int answerIndex;
+	public int answerIndex;
 }
+
+
 
