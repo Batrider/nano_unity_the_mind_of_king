@@ -139,9 +139,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 998b52aa3a41dd24ea0140c1489fdb74, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerPrefab: {fileID: 114954836658045166, guid: 8518ec1fd79e17247a17584f8527b033,
-    type: 2}
-  players: []
   text: {fileID: 1993315834}
 --- !u!4 &631242347
 Transform:
@@ -241,7 +238,7 @@ Camera:
   m_GameObject: {fileID: 1257501156}
   m_Enabled: 1
   serializedVersion: 2
-  m_ClearFlags: 3
+  m_ClearFlags: 2
   m_BackGroundColor: {r: 0.19852942, g: 0.19852942, b: 0.19852942, a: 0}
   m_NormalizedViewPortRect:
     serializedVersion: 2

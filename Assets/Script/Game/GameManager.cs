@@ -7,9 +7,9 @@ using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
-    public static ulong mainPlayerUid;
+    public static int mainPlayerUid;
     public Text text;
-    public Queue<Quesition> quesitionQueue = new Queue<Quesition>();
+    public Queue<byte[]> quesitionQueue = new Queue<byte[]>();
     /// <summary>
     /// net connect
     /// </summary>
@@ -19,11 +19,31 @@ public class GameManager : MonoBehaviour
         {
             NetworkManager.EnterWorld((msg) =>
             {
+                Debug.Log("enter");
+                string jsonData = Encoding.UTF8.GetString(msg);
+                EnterWorldResponse jsonObj = SimpleJson.SimpleJson.DeserializeObject<EnterWorldResponse>(jsonData);
+                mainPlayerUid = jsonObj.id;
+                NetworkManager.StarXService.On("questionNotify", QuesitionNotifyHandler);
+                NetworkManager.StarXService.On("onMessage", onMessageHandler);
+                NetworkManager.StarXService.On("leave", onLeaveHandler);
                 NetworkManager.StarXService.On("AnswerNotify", AnswerNotify);
-                NetworkManager.StarXService.On("QuestionNotify", QuesitionNotify);
             });
         });
     }
+    void OnUpdateMyWorld(byte[] msg)
+    {
+        Debug.Log("OnUpdateMyWorld");
+    }
+
+    void onMessageHandler(byte[] msg)
+    {
+        Debug.Log("OnMessage");
+    }
+    void onLeaveHandler(byte[] msg)
+    {
+        Debug.Log("OnLeave");
+    }
+
     /// <summary>
     /// on player data update
     /// </summary>
@@ -47,11 +67,10 @@ public class GameManager : MonoBehaviour
     /// create self
     /// </summary>
     /// <param name="msg"></param>
-    void QuesitionNotify(byte[] msg)
+    void QuesitionNotifyHandler(byte[] msg)
     {
-        string jsonData = Encoding.UTF8.GetString(msg);
-        Quesition jsonObj = (Quesition)SimpleJson.SimpleJson.DeserializeObject(jsonData);
-        quesitionQueue.Enqueue(jsonObj);
+        Debug.Log("recieve question");
+        quesitionQueue.Enqueue(msg);
     }
     /// <summary>
     /// update player position
@@ -59,19 +78,56 @@ public class GameManager : MonoBehaviour
     /// if player != nil,update pos
     /// </summary>
     /// <param name="data"></param>
-    void ShowQuestion(Quesition data)
+    void ShowQuestion(byte[] msg)
     {
-        text.text = data.SDesc;
+        string jsonData = Encoding.UTF8.GetString(msg);
+        Debug.Log(jsonData);
+        Quesition jsonObj = SimpleJson.SimpleJson.DeserializeObject<Quesition>(jsonData);
+        text.text = jsonObj.sDesc;
+    }
+
+    public void OnDestroy()
+    {
+        NetworkManager.StarXService.Notify("Room.LeaveRoom", new byte[] { });
     }
 }
 
 public class Quesition
 {
-    public string STitle;
-    public string SDesc;
-    public string SDesc1;
-    public string SDesc2;
-    public string Desc3;
-    public string SDesc4;
-    public int IRightIdx;
+    public int id;
+    public string sDesc;
+    public string sDesc1;
+    public string sDesc2;
+    public string sDesc3;
+    public string sDesc4;
+    public int iRightIdx;
+}
+
+public class AnswerNotify
+{
+    public int id;
+    public bool isRight;
+    public int score;
+}
+
+public class Player
+{
+    public int id;
+    public string name;
+    public int score;
+}
+
+public class EnterWorldResponse
+{
+    public int id;
+}
+
+public class LeaveWorldResponse
+{
+    public int id;
+}
+
+public class StartRequest
+{
+    public int id;
 }
